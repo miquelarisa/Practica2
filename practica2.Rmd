@@ -1,0 +1,173 @@
+---
+title: 'Tipologia i cicle de vida de les dades: Pràctica 2: Com realitzar la neteja i la anàlisi de dades?'
+author: "Autor: Adrià Setó Balcells i Miquel Arisa Fuente"
+date: "Gener 2023"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: practica2-header.html
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Descripció del dataset
+
+Actualment, al món dels esports, explotar la informació et pot donar un immens avantatge. Com més informació tenen els equips tant d'ells mateixos com del seu rival, de forma col·lectiva o de forma individual per jugador, més fàcil és per ells preparar els partits i les competicions i augmenten molt més les possibilitats d'aconseguir la victòria. Els mètodes de scouting dins del món del futbol estan molt avançats i personalitzats per a cada un dels equips i jugadors, abarcant un mercat molt gran tenint dades fins i tot d'equips de categories inferiors. Això és una cosa que ens crida molt l'atenció, degut a la nostra passió pels esports i per les dades.
+Pel desenvolupament d'aquesta pràctica hem decidit escollir un dataset diferent al generat a la pràctica 1, on feiem un scrapping de les apostes juntament amb les seves quotes de diferents cases d'apostes. En aquest cas hem agafat varis datasets de la pàgina web [Data Hub](https://datahub.io/). Aquestes són dades dels partits de futbol jugats a tres grans lligues (Premier, La Liga, Bundesliga) durant quatre temporades (des de la 2018-2019 fins a la 2021-2022). Aquests datasets recullen tot de dades rellevants dins dels partits de futbol com ara córners, targetes, xuts a porteria...
+Aquestes dades estan sota la llicencia Open Data Commons i són subministrades per la web www.football-data.co.uk/
+Ajuntem aquests dotze datasets per formar un gran dataset amb tota l'informació i d'on poder realitzar un bon estudi.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+require(data.table)
+library(datasets)
+library(tidyverse)
+
+# Carreguem el joc de dades
+
+premier_1819 <- read_csv('dataset_lligues/Anglesa/premier_18-19.csv')
+premier_1920 <- read_csv('dataset_lligues/Anglesa/premier_19-20.csv')
+premier_2021 <- read_csv('dataset_lligues/Anglesa/premier_20-21.csv')
+premier_2122 <- read_csv('dataset_lligues/Anglesa/premier_21-22.csv')
+
+laliga_1819 <- read_csv('dataset_lligues/Espanyola/laliga_18-19.csv')
+laliga_1920 <- read_csv('dataset_lligues/Espanyola/laliga_19-20.csv')
+laliga_2021 <- read_csv('dataset_lligues/Espanyola/laliga_20-21.csv')
+laliga_2122 <- read_csv('dataset_lligues/Espanyola/laliga_21-22.csv')
+
+bundesliga_1819 <- read_csv('dataset_lligues/Alemana/bundesliga_18-19.csv')
+bundesliga_1920 <- read_csv('dataset_lligues/Alemana/bundesliga_19-20.csv')
+bundesliga_2021 <- read_csv('dataset_lligues/Alemana/bundesliga_20-21.csv')
+bundesliga_2122 <- read_csv('dataset_lligues/Alemana/bundesliga_21-22.csv')
+
+```
+
+Veiem que tenim 306 registres a cada una de les temporades de la Bundesliga i 380 registres a cada una de les temporades de la Premier League i de La Liga. Això és degut al fet que la lliga alemana consta de 18 equips a la competició, mentre que a les altres dues en són 20 els que la formen.
+Veiem també que les tres últimes temporades de la Premier tenen 106 variables, mentre que l'altre en té 62, això passa exactament de la mateixa manera amb les altres dues lligues, tenint-ne 105 a les tres últimes i 61 a la restant. Hi ha una diferència d'una variable entre la lliga anglesa i les altres dues, això és perquè als datasets de la Premier hi ha la variable Referee, que guarda l'àrbitre principal del partit, mentre que la lliga alemana i la lliga espanyola aquesta variable no la guarden.
+
+-----------------------------------DESCRIURE L'OBJECTIU DE L'ANÀLISI-----------------------------------
+
+# Integració i selecció
+
+```{r}
+
+# Seleccionem les columnes que ens interessen
+
+premier_1819 <- na.omit(premier_1819, row.names=NULL)[,2:26]
+premier_1920 <- na.omit(premier_1920, row.names=NULL)[,2:27]
+premier_2021 <- na.omit(premier_2021, row.names=NULL)[,2:27]
+premier_2122 <- na.omit(premier_2122, row.names=NULL)[,2:27]
+
+laliga_1819 <- na.omit(laliga_1819, row.names=NULL)[,2:25]
+laliga_1920 <- na.omit(laliga_1920, row.names=NULL)[,2:26]
+laliga_2021 <- na.omit(laliga_2021, row.names=NULL)[,2:26]
+laliga_2122 <- na.omit(laliga_2122, row.names=NULL)[,2:26]
+
+bundesliga_1819 <- na.omit(bundesliga_1819, row.names=NULL)[,2:25]
+bundesliga_1920 <- na.omit(bundesliga_1920, row.names=NULL)[,2:26]
+bundesliga_2021 <- na.omit(bundesliga_2021, row.names=NULL)[,2:26]
+bundesliga_2122 <- na.omit(bundesliga_2122, row.names=NULL)[,2:26]
+
+
+# Afegim variables omplertes com a NA (valors perduts) als datasets que els n'hi falten algunes (Time i Referee)
+
+premier_1819$Time <- NA
+laliga_1819$Time <- NA
+bundesliga_1819$Time <- NA
+
+laliga_1819$Referee <- NA
+laliga_1920$Referee <- NA
+laliga_2021$Referee <- NA
+laliga_2122$Referee <- NA
+
+bundesliga_1819$Referee <- NA
+bundesliga_1920$Referee <- NA
+bundesliga_2021$Referee <- NA
+bundesliga_2122$Referee <- NA
+
+
+# Afegim variables (Season i Competition) per reconeixer la temporada i la competició
+
+premier_1819$Season <- "2018-2019"
+premier_1920$Season <- "2019-2020"
+premier_2021$Season <- "2020-2021"
+premier_2122$Season <- "2021-2022"
+
+laliga_1819$Season <- "2018-2019"
+laliga_1920$Season <- "2019-2020"
+laliga_2021$Season <- "2020-2021"
+laliga_2122$Season <- "2021-2022"
+
+bundesliga_1819$Season <- "2018-2019"
+bundesliga_1920$Season <- "2019-2020"
+bundesliga_2021$Season <- "2020-2021"
+bundesliga_2122$Season <- "2021-2022"
+
+premier_1819$Competition <- "Premier League"
+premier_1920$Competition <- "Premier League"
+premier_2021$Competition <- "Premier League"
+premier_2122$Competition <- "Premier League"
+
+laliga_1819$Competition <- "La Liga"
+laliga_1920$Competition <- "La Liga"
+laliga_2021$Competition <- "La Liga"
+laliga_2122$Competition <- "La Liga"
+
+bundesliga_1819$Competition <- "Bundesliga"
+bundesliga_1920$Competition <- "Bundesliga"
+bundesliga_2021$Competition <- "Bundesliga"
+bundesliga_2122$Competition <- "Bundesliga"
+
+```
+
+```{r}
+
+# Unim tots els datasets en un de sol anomenat football_matches
+
+football_matches <- rbind(
+  premier_2122, premier_2021, premier_1920, premier_1819,
+  laliga_2122, laliga_2021, laliga_1920, laliga_1819,
+  bundesliga_2122, bundesliga_2021, bundesliga_1920, bundesliga_1819
+)
+
+```
+
+
+# Neteja de les dades
+
+## Les dades contenen zeros o elements buits? Gestiona cadascun d’aquests casos
+
+
+## Identifica i gestiona els valors extrems
+
+
+
+# Anàlisi de les dades
+
+## Selecció dels grups de dades que es volen analitzar/comparar (p. e., si es volen comparar grups de dades, quins són aquests grups i quins tipus d’anàlisi s’aplicaran?)
+
+
+## Comprovació de la normalitat i homogeneïtat de la variància
+
+
+## Aplicació de proves estadístiques per comparar els grups de dades. En funció de les dades i de l’objectiu de l’estudi, aplicar proves de contrast d’hipòtesis, correlacions, regressions, etc. Aplicar almenys tres mètodes d’anàlisi diferents
+
+
+
+# Representació dels resultats
+
+
+
+# Resolució del problema
+
+
