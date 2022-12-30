@@ -428,8 +428,29 @@ resultats</a></li>
 <div id="descripció-del-dataset" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Descripció del
 dataset</h1>
-<pre class="r"><code># packages
-require(data.table)
+<p>Actualment, al món dels esports, explotar la informació et pot donar
+un immens avantatge. Com més informació tenen els equips tant d’ells
+mateixos com del seu rival, de forma col·lectiva o de forma individual
+per jugador, més fàcil és per ells preparar els partits i les
+competicions i augmenten molt més les possibilitats d’aconseguir la
+victòria. Els mètodes de scouting dins del món del futbol estan molt
+avançats i personalitzats per a cada un dels equips i jugadors, abarcant
+un mercat molt gran tenint dades fins i tot d’equips de categories
+inferiors. Això és una cosa que ens crida molt l’atenció, degut a la
+nostra passió pels esports i per les dades. Pel desenvolupament
+d’aquesta pràctica hem decidit escollir un dataset diferent al generat a
+la pràctica 1, on feiem un scrapping de les apostes juntament amb les
+seves quotes de diferents cases d’apostes. En aquest cas hem agafat
+varis datasets de la pàgina web <a href="https://datahub.io/">Data
+Hub</a>. Aquestes són dades dels partits de futbol jugats a tres grans
+lligues (Premier, La Liga, Bundesliga) durant quatre temporades (des de
+la 2018-2019 fins a la 2021-2022). Aquests datasets recullen tot de
+dades rellevants dins dels partits de futbol com ara córners, targetes,
+xuts a porteria… Aquestes dades estan sota la llicencia Open Data
+Commons i són subministrades per la web www.football-data.co.uk/ Ajuntem
+aquests dotze datasets per formar un gran dataset amb tota l’informació
+i d’on poder realitzar un bon estudi.</p>
+<pre class="r"><code>require(data.table)
 library(datasets)
 library(tidyverse)
 
@@ -449,14 +470,96 @@ bundesliga_1819 &lt;- read_csv(&#39;dataset_lligues/Alemana/bundesliga_18-19.csv
 bundesliga_1920 &lt;- read_csv(&#39;dataset_lligues/Alemana/bundesliga_19-20.csv&#39;)
 bundesliga_2021 &lt;- read_csv(&#39;dataset_lligues/Alemana/bundesliga_20-21.csv&#39;)
 bundesliga_2122 &lt;- read_csv(&#39;dataset_lligues/Alemana/bundesliga_21-22.csv&#39;)</code></pre>
-<div id="exploració-del-conjunt-de-dades" class="section level3" number="1.0.1">
-<h3><span class="header-section-number">1.0.1</span> Exploració del
-conjunt de dades</h3>
-</div>
+<p>Veiem que tenim 306 registres a cada una de les temporades de la
+Bundesliga i 380 registres a cada una de les temporades de la Premier
+League i de La Liga. Això és degut al fet que la lliga alemana consta de
+18 equips a la competició, mentre que a les altres dues en són 20 els
+que la formen. Veiem també que les tres últimes temporades de la Premier
+tenen 106 variables, mentre que l’altre en té 62, això passa exactament
+de la mateixa manera amb les altres dues lligues, tenint-ne 105 a les
+tres últimes i 61 a la restant. Hi ha una diferència d’una variable
+entre la lliga anglesa i les altres dues, això és perquè als datasets de
+la Premier hi ha la variable Referee, que guarda l’àrbitre principal del
+partit, mentre que la lliga alemana i la lliga espanyola aquesta
+variable no la guarden.</p>
+<p>———————————–DESCRIURE L’OBJECTIU DE L’ANÀLISI———————————–</p>
 </div>
 <div id="integració-i-selecció" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Integració i
 selecció</h1>
+<pre class="r"><code># Seleccionem les columnes que ens interessen
+
+premier_1819 &lt;- na.omit(premier_1819, row.names=NULL)[,2:26]
+premier_1920 &lt;- na.omit(premier_1920, row.names=NULL)[,2:27]
+premier_2021 &lt;- na.omit(premier_2021, row.names=NULL)[,2:27]
+premier_2122 &lt;- na.omit(premier_2122, row.names=NULL)[,2:27]
+
+laliga_1819 &lt;- na.omit(laliga_1819, row.names=NULL)[,2:25]
+laliga_1920 &lt;- na.omit(laliga_1920, row.names=NULL)[,2:26]
+laliga_2021 &lt;- na.omit(laliga_2021, row.names=NULL)[,2:26]
+laliga_2122 &lt;- na.omit(laliga_2122, row.names=NULL)[,2:26]
+
+bundesliga_1819 &lt;- na.omit(bundesliga_1819, row.names=NULL)[,2:25]
+bundesliga_1920 &lt;- na.omit(bundesliga_1920, row.names=NULL)[,2:26]
+bundesliga_2021 &lt;- na.omit(bundesliga_2021, row.names=NULL)[,2:26]
+bundesliga_2122 &lt;- na.omit(bundesliga_2122, row.names=NULL)[,2:26]
+
+
+# Afegim variables omplertes com a NA (valors perduts) als datasets que els n&#39;hi falten algunes (Time i Referee)
+
+premier_1819$Time &lt;- NA
+laliga_1819$Time &lt;- NA
+bundesliga_1819$Time &lt;- NA
+
+laliga_1819$Referee &lt;- NA
+laliga_1920$Referee &lt;- NA
+laliga_2021$Referee &lt;- NA
+laliga_2122$Referee &lt;- NA
+
+bundesliga_1819$Referee &lt;- NA
+bundesliga_1920$Referee &lt;- NA
+bundesliga_2021$Referee &lt;- NA
+bundesliga_2122$Referee &lt;- NA
+
+
+# Afegim variables (Season i Competition) per reconeixer la temporada i la competició
+
+premier_1819$Season &lt;- &quot;2018-2019&quot;
+premier_1920$Season &lt;- &quot;2019-2020&quot;
+premier_2021$Season &lt;- &quot;2020-2021&quot;
+premier_2122$Season &lt;- &quot;2021-2022&quot;
+
+laliga_1819$Season &lt;- &quot;2018-2019&quot;
+laliga_1920$Season &lt;- &quot;2019-2020&quot;
+laliga_2021$Season &lt;- &quot;2020-2021&quot;
+laliga_2122$Season &lt;- &quot;2021-2022&quot;
+
+bundesliga_1819$Season &lt;- &quot;2018-2019&quot;
+bundesliga_1920$Season &lt;- &quot;2019-2020&quot;
+bundesliga_2021$Season &lt;- &quot;2020-2021&quot;
+bundesliga_2122$Season &lt;- &quot;2021-2022&quot;
+
+premier_1819$Competition &lt;- &quot;Premier League&quot;
+premier_1920$Competition &lt;- &quot;Premier League&quot;
+premier_2021$Competition &lt;- &quot;Premier League&quot;
+premier_2122$Competition &lt;- &quot;Premier League&quot;
+
+laliga_1819$Competition &lt;- &quot;La Liga&quot;
+laliga_1920$Competition &lt;- &quot;La Liga&quot;
+laliga_2021$Competition &lt;- &quot;La Liga&quot;
+laliga_2122$Competition &lt;- &quot;La Liga&quot;
+
+bundesliga_1819$Competition &lt;- &quot;Bundesliga&quot;
+bundesliga_1920$Competition &lt;- &quot;Bundesliga&quot;
+bundesliga_2021$Competition &lt;- &quot;Bundesliga&quot;
+bundesliga_2122$Competition &lt;- &quot;Bundesliga&quot;</code></pre>
+<pre class="r"><code># Unim tots els datasets en un de sol anomenat football_matches
+
+football_matches &lt;- rbind(
+  premier_2122, premier_2021, premier_1920, premier_1819,
+  laliga_2122, laliga_2021, laliga_1920, laliga_1819,
+  bundesliga_2122, bundesliga_2021, bundesliga_1920, bundesliga_1819
+)</code></pre>
 </div>
 <div id="neteja-de-les-dades" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Neteja de les
