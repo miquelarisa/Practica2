@@ -147,10 +147,28 @@ football_matches <- rbind(
 
 ## Les dades contenen zeros o elements buits? Gestiona cadascun d’aquests casos
 
+Veiem un resum dels valors zero o elements buits del joc de dades amb el qual treballarem.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+print('NA all_matches')
+colSums(is.na(football_matches))
+print('Blancs all_matches')
+colSums(football_matches=="")
+```
+
+Podem veure com només tenim variables on no hi ha valors a les variables Time i Referee, que són les dues a les quals els hi hem ficat nosaltres per tal de que tots els datasets tinguessin les mateixes columnes i poder-los unir en un sol dataset gran. A la resta de columnes veiem on no hi ha cap valor zero o element buit, cosa positiva per al nostre anàlisi.
 
 ## Identifica i gestiona els valors extrems
 
+Generarem un resum de tot el dataset complet per tenir una primera impresió d'aquest i poder veure si hi ha algun valor que ens faci sospitar d'algun error. Per això veurem el màxim, mínim, mitjana, mediana... de cada variable.
 
+```{r}
+
+summary(football_matches)
+
+```
+
+---------------------------------------- FER REFLEXIÓ DE LES DADES ----------------------------------------
 
 # Anàlisi de les dades
 
