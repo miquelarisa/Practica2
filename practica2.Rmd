@@ -202,6 +202,7 @@ names(referee)[names(referee) == 'n'] <- 'total_games'
 ## Comprovació de la normalitat i homogeneïtat de la variància
 
 
+
 ## Aplicació de proves estadístiques per comparar els grups de dades. En funció de les dades i de l’objectiu de l’estudi, aplicar proves de contrast d’hipòtesis, correlacions, regressions, etc. Aplicar almenys tres mètodes d’anàlisi diferents
 
 
