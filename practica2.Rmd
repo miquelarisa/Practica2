@@ -55,7 +55,22 @@ bundesliga_2122 <- read_csv('dataset_lligues/Alemana/bundesliga_21-22.csv')
 Veiem que tenim 306 registres a cada una de les temporades de la Bundesliga i 380 registres a cada una de les temporades de la Premier League i de La Liga. Això és degut al fet que la lliga alemana consta de 18 equips a la competició, mentre que a les altres dues en són 20 els que la formen.
 Veiem també que les tres últimes temporades de la Premier tenen 106 variables, mentre que l'altre en té 62, això passa exactament de la mateixa manera amb les altres dues lligues, tenint-ne 105 a les tres últimes i 61 a la restant. Hi ha una diferència d'una variable entre la lliga anglesa i les altres dues, això és perquè als datasets de la Premier hi ha la variable Referee, que guarda l'àrbitre principal del partit, mentre que la lliga alemana i la lliga espanyola aquesta variable no la guarden.
 
+# Objectiu de l'anàlisi
 -----------------------------------DESCRIURE L'OBJECTIU DE L'ANÀLISI-----------------------------------
+OMPLIR part àrbitres!!!
+
+## Restriccions COVID-19 als estadis
+
+Durant el març de 2020 es van implementar estrictes mesures arreu del món, posades en marxa per intentar evitar la propagació de la COVID-19 i els seus efectes, que principalment minimitzaven el contacte entre persones. Això va comportar l'aturada temporal de totes les lligues europees, algunes de les quals fins i tot van donar la temporada per finalitzada tot i tenir partits pendents per jugar, com en el cas de la Ligue 1. 
+
+Entre maig i juny de 2020, les competicions de futbol professional que no van cancel·lar la resta de partits pendents, van tornar a posar-se en marxa, però amb restriccions totals d'aforament. Així doncs, el tram final de la temporada 2019-2020 es va jugar sense públic en les tres lligues analitzades (La Liga, Premier League, Bundesliga).
+
+La temporada següent, 2020-2021, va tenir unes restriccions similars, tot i que es va permetre un aforament bastant reduït en un nombre molt limitat de jornades. 
+
+Finalment, durant la temporada 2021-2022 es va anar normalitzant la situació i, tot i que hi havia un límit d'aforament que variava segons el país i la regió, la majoria dels partits es van jugar ja amb una assistència de públic de milers de persones.
+
+Degut a l'impacte que se li atribueix als aficionats al rendiment dels equips tot i no participar directament en el joc, s'analitzaran els resultats dels partits (victòria local/visitant o empat) segons múltiples variables, per poder comprovar si les restriccions d'aforament per la COVID-19 han pogut influir en els resultats dels partits.
+
 
 # Integració i selecció
 
@@ -262,15 +277,7 @@ shapiro.test(football_matches$AR)
 
 ## Restriccions COVID-19 als estadis
 
-Durant el març de 2020 es van implementar estrictes mesures arreu del món, posades en marxa per intentar evitar la propagació de la COVID-19 i els seus efectes, que principalment minimitzaven el contacte entre persones. Això va comportar l'aturada temporal de totes les lligues europees, algunes de les quals fins i tot van donar la temporada per finalitzada tot i tenir partits pendents per jugar, com en el cas de la Ligue 1. 
-
-Entre maig i juny de 2020, les competicions de futbol professional que no van cancel·lar la resta de partits pendents, van tornar a posar-se en marxa, però amb restriccions totals d'aforament. Així doncs, el tram final de la temporada 2019-2020 es va jugar sense públic en les tres lligues analitzades (La Liga, Premier League, Bundesliga).
-
-La temporada següent, 2020-2021, va tenir unes restriccions similars, tot i que es va permetre un aforament bastant reduït en un nombre molt limitat de jornades. 
-
-Finalment, durant la temporada 2021-2022 es va anar normalitzant la situació i, tot i que hi havia un límit d'aforament que variava segons el país i la regió, la majoria dels partits es van jugar ja amb una assistència de públic de milers de persones.
-
-Degut a l'impacte que se li atribueix als aficionats al rendiment dels equips tot i no participar directament en el joc, en aquest apartat s'analitzaran els resultats dels partits (victòria local/visitant o empat) segons múltiples variables, per poder comprovar si les restriccions d'aforament per la COVID-19 han pogut influir en els resultats dels partits.
+En aquest apartat es representaran els resultats de l'anàlisi dels resultats dels partits (victòria local/visitant o empat) segons múltiples variables. La representació d'aquestes dades es realitzarà mitjançant gràfiques de barres apilades, amb el percentatge de partits sobre el total.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
