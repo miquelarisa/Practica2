@@ -284,7 +284,7 @@ shapiro.test(football_matches$AY)
 shapiro.test(football_matches$HR)
 shapiro.test(football_matches$AR)
 
-par(mfrow=c(4,2))
+par(mfrow=c(2,2))
 hist(football_matches$HY)
 qqnorm(football_matches$HY, main="Normal Q-Q Plot for HY")
 qqline(football_matches$HY,col=2)
@@ -298,6 +298,10 @@ hist(football_matches$AR)
 qqnorm(football_matches$AR, main="Normal Q-Q Plot for HR")
 qqline(football_matches$AR,col=2)
 ```
+
+En el cas de la comprovació per test de Shapiro-Wilk, s'observa en totes les quatre variables un p-valor molt més petit que el nivell de significació de 0.05, per la qual cosa es podria rebutjar la hipòtesi de normalitat i concloure que les dades no compten amb una distribució normal.
+
+No obstant, si es realitza un anàlisi per gràfics Q-Q (gràfics de quantils teòrics), sí que s'observa una possible normalitat en les targetes grogues, tant locals com visitants. Així doncs, s'hauria de fer un anàlisi estadístic més a fons en aquestes dues variables per determinar si la hipòtesi de normalitat es compleix.
 
 # Aplicació de proves estadístiques i representació dels resultats
 
