@@ -3,6 +3,10 @@ title: 'Tipologia i cicle de vida de les dades: Pràctica 2: Com realitzar la ne
 author: "Autor: Adrià Setó Balcells i Miquel Arisa Fuente"
 date: "Gener 2023"
 output:
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
   html_document:
     highlight: default
     number_sections: yes
@@ -11,10 +15,6 @@ output:
     toc_depth: 2
     includes:
       in_header: practica2-header.html
-  word_document: default
-  pdf_document:
-    highlight: zenburn
-    toc: yes
 ---
 
 ```{r setup, include=FALSE}
