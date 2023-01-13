@@ -56,8 +56,12 @@ Veiem que tenim 306 registres a cada una de les temporades de la Bundesliga i 38
 Veiem també que les tres últimes temporades de la Premier tenen 106 variables, mentre que l'altre en té 62, això passa exactament de la mateixa manera amb les altres dues lligues, tenint-ne 105 a les tres últimes i 61 a la restant. Hi ha una diferència d'una variable entre la lliga anglesa i les altres dues, això és perquè als datasets de la Premier hi ha la variable Referee, que guarda l'àrbitre principal del partit, mentre que la lliga alemana i la lliga espanyola aquesta variable no la guarden.
 
 # Objectiu de l'anàlisi
------------------------------------DESCRIURE L'OBJECTIU DE L'ANÀLISI-----------------------------------
-OMPLIR part àrbitres!!!
+
+## Comportament dels àrbitres davant el públic local
+
+És conegut que la majoria d'equips prefereixen jugar els partits als seu estadi, de forma local, que al del seu rival, de forma visitant. Això és degut a la comoditat del camp, però també a l'efecte públic que efecta sobre el rival i sobre la presió a l'àrbitre.
+
+Els àrbitres són educats i entrenats per suportar la presió, de la mateixa manera que els jugadors, però pensem que com a persones també els afecta. Així volem comprovar si els àrbitres tenen un comportament que tendeixi a afavorir més a l'equip local que al visitant, i si l'experiència d'aquests juga a favor o en contra.
 
 ## Restriccions COVID-19 als estadis
 
@@ -183,33 +187,64 @@ summary(football_matches)
 
 ```
 
----------------------------------------- FER REFLEXIÓ DE LES DADES ----------------------------------------
-
 # Anàlisi de les dades
 
 ## Selecció dels grups de dades que es volen analitzar/comparar (p. e., si es volen comparar grups de dades, quins són aquests grups i quins tipus d’anàlisi s’aplicaran?)
 
 ```{r}
+# Creem un dataset amb tot el recull de dades dels àrbitres, partits jugats, tagetes ensenyades, faltes pitades, resultats dels partits
+
+total_referee_faults <- aggregate(HF+AF ~ Referee, football_matches, sum)
 total_referee_yellow_cards <- aggregate(HY+AY ~ Referee, football_matches, sum)
 total_referee_red_cards <- aggregate(HR+AR ~ Referee, football_matches, sum)
+mean_referee_faults <- aggregate(HF+AF ~ Referee, football_matches, mean)
 mean_referee_yellow_cards <- aggregate(HY+AY ~ Referee, football_matches, mean)
 mean_referee_red_cards <- aggregate(HR+AR ~ Referee, football_matches, mean)
+
+referee_result <- dcast(setDT(football_matches), Referee~FTR, length)
+referee_result = referee_result[-1,]
 
 count_referee <- count(football_matches, Referee)
 count_referee <- head(count_referee, - 1)
 
 referee <- mean_referee_yellow_cards
-referee[3] <- mean_referee_red_cards[2]
-referee[4] <- total_referee_yellow_cards[2]
-referee[5] <- total_referee_red_cards[2]
-referee[6] <- count_referee[2]
-
 names(referee)[names(referee) == 'Referee'] <- 'name'
 names(referee)[names(referee) == 'HY + AY'] <- 'avg_Y'
-names(referee)[names(referee) == 'HR + AR'] <- 'avg_R'
-names(referee)[names(referee) == 'HY + AY.1'] <- 'total_Y'
-names(referee)[names(referee) == 'HR + AR.1'] <- 'total_R'
-names(referee)[names(referee) == 'n'] <- 'total_games'
+
+referee['avg_R'] <- mean_referee_red_cards[2]
+referee['avg_F'] <- mean_referee_faults[2]
+referee['total_Y'] <- total_referee_yellow_cards[2]
+referee['total_R'] <- total_referee_red_cards[2]
+referee['total_F'] <- total_referee_faults[2]
+
+referee['total_games'] <- count_referee$n
+referee['H'] <- referee_result$H
+referee['D'] <- referee_result$D
+referee['A'] <- referee_result$A
+
+# Definim l'esperiència dels arbitres:  10 partits o menys -> Poca experiència
+#                                       11 - 89 partits    -> Mitja experiència
+#                                       90 partits o més   -> Molta experiència
+
+referee$experience <- ifelse(referee$total_games <= 10, "Low", ifelse(referee$total_games >= 90, "High", "Mid"))
+
+# Creem un dataset segons el nivell d'experiència i el percentatge de victories locals, visitants i empats
+
+experience_total_games <- aggregate(total_games ~ experience, referee, sum)
+
+experience_total_home <- aggregate(H ~ experience, referee, sum)
+
+experience_total_draw <- aggregate(D ~ experience, referee, sum)
+
+experience_total_away <- aggregate(A ~ experience, referee, sum)
+
+experience_stats = experience_total_games
+
+experience_stats['H'] <- experience_total_home$H/experience_total_games$total_games
+experience_stats['D'] <- experience_total_draw$D/experience_total_games$total_games
+experience_stats['A'] <- experience_total_away$A/experience_total_games$total_games
+
+experience_stats <- experience_stats[,!names(experience_stats) %in% c("total_games")]
 
 # S'afegeixen columnes addicionals necessàries en l'anàlisi posterior
 football_matches <- football_matches %>% 
@@ -264,11 +299,7 @@ qqnorm(football_matches$AR, main="Normal Q-Q Plot for HR")
 qqline(football_matches$AR,col=2)
 ```
 
-## Aplicació de proves estadístiques per comparar els grups de dades. En funció de les dades i de l’objectiu de l’estudi, aplicar proves de contrast d’hipòtesis, correlacions, regressions, etc. Aplicar almenys tres mètodes d’anàlisi diferents
-
-
-
-# Representació dels resultats
+# Aplicació de proves estadístiques i representació dels resultats
 
 ## Restriccions COVID-19 als estadis
 
@@ -319,7 +350,69 @@ Finalment, a l'anàlisi de la temporada 2019-2020 abans i després de l'aparici�
 
 Com a conclusió, tot sembla apuntar que l'efecte dels aficionats de l'estadi en els resultats del seu equip és real i apreciable, tot i que cal destacar que, en una lliga com la Bundesliga que sempre té uns bons números d'assistència de públic que alhora genera un gran ambient a l'estadi, sorprén que no es vegui l'efecte de les restriccions d'aforament en els resultats.
 
-# Resolució del problema
+
+## Comportament dels àrbitres segons la seva experiència als terrenys de joc
+
+```{r}
+
+# Models de regressió lineal
+
+# Targetes vermelles
+
+model1 = lm(avg_R ~ total_games, data=referee, na.action=na.exclude)
+
+summary(model1)
+
+corr_pearson = sqrt(0.4088)
+corr_pearson
+
+ggplot(referee, aes(total_games, avg_R)) + geom_point() + geom_smooth(method = "lm", colour = "Red") + ggtitle("Regressió lineal del nombre de targetes vermelles per partit segons l'experiència de l'àrbitre")
+
+
+# Targetes grogues
+
+model2 = lm(avg_Y ~ total_games, data=referee, na.action=na.exclude)
+
+summary(model2)
+
+corr_pearson2 = sqrt(0.001172)
+corr_pearson2
+
+ggplot(referee, aes(total_games, avg_Y)) + geom_point() + geom_smooth(method = "lm", colour = "Red") + ggtitle("Regressió lineal del nombre de targetes grogues per partit segons l'experiència de l'àrbitre")
+
+
+# Faltes
+
+model3 = lm(avg_F ~ total_games, data=referee, na.action=na.exclude)
+
+summary(model3)
+
+corr_pearson3 = sqrt(0.01304)
+corr_pearson3
+
+ggplot(referee, aes(total_games, avg_F)) + geom_point() + geom_smooth(method = "lm", colour = "Red") + ggtitle("Regressió lineal del nombre de faltes per partit segons l'experiència de l'àrbitre")
+
+```
+
+Podem observar com els coeficients de la correlació de pearson són bastant baixos, cosa que indica que no hi ha molta dependència a les correlacions lineals. Sí que amb la comparativa de nombre de partits i ratgetes vermelles el nombre és una mica més elevat i podem treure la conclusió que els àrbitres amb menys experiència treuen menys targetes vermelles. Això pot ser degut a la presió del primer partit i al no voler quedar assenyalat fent un partit sense prendre riscos.
+
+
+```{r}
+
+H <- c(experience_stats$H)
+D <- c(experience_stats$D)
+A <- c(experience_stats$A)
+
+games <- cbind(H, D, A)
+
+rownames(games) <- c("High", "Low", "Mid")
+
+barplot(games, beside = T, col = c("blue","red","yellow"), main = "Comparativa de resultats segons l'experiència",
+        legend.text = rownames(games))
+
+```
+
+A l'hora de mirar les diferències de resultats segons si l'experiència de l'àrbitre es veu com hi ha una diferència entre les victòries locals i visitants. S'observa com als partits arbitrats per àrbitres novells hi ha un percentatge de victòries i d'empats superior als arbitrats per àrbitres experimentats, i tot el contrari amb les victòries visitants. Això pot ser degut a la presió efectuada del públic sobre l'àrbitre i la manera que té l'àrbitre de gestionar-la. També considerem que les temporades estudiades no acaben de reflectir al 100% la presió rebuda pels àrbitres degut a que la meitat d'aquests partits es van jugar a porta tancada o sense públic, tot i així ja es veuen reflectits uns indícis del comportament dels àrbitres davant la presió efectuada pel públic local.
 
 
 # Bibliografía
