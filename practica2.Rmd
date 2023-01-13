@@ -196,12 +196,63 @@ names(referee)[names(referee) == 'HY + AY.1'] <- 'total_Y'
 names(referee)[names(referee) == 'HR + AR.1'] <- 'total_R'
 names(referee)[names(referee) == 'n'] <- 'total_games'
 
+# S'afegeixen columnes addicionals necessàries en l'anàlisi posterior
+football_matches <- football_matches %>% 
+  mutate(Result = case_when(FTR == "A" ~ "Away",
+                             FTR == "D" ~ "Draw",
+                             FTR == "H" ~ "Home"))
+# Conversió de data
+football_matches$Date <- as.Date(football_matches$Date , format = "%d/%m/%y")
+
+# Restriccions covid (Temporada 19-20)
+football_matches$CovidRestrictions <- "No"
+football_matches$CovidRestrictions[football_matches$Date > as.Date("31/03/2020", format = "%d/%m/%y") &
+                                     football_matches$Season == "2019-2020"] <- "Yes"
+
+# Resultats per temporada
+result_by_season <- count(football_matches, Season, Result, name = "NumMatches") %>%
+  group_by(Season) %>% mutate(percent = 100*NumMatches/sum(NumMatches))
+
+# Resultats per temporada i competició
+result_by_competition_season <- count(football_matches, Competition, Season, Result, name = "NumMatches") %>%
+  group_by(Competition, Season) %>% mutate(percent = 100*NumMatches/sum(NumMatches))
+
+# Resultats per Post/pre covid i competició (2019-2020)
+result_by_competition_covid <- football_matches %>% filter(Season == "2019-2020") %>%  
+  count(Competition, CovidRestrictions, Result, name = "NumMatches") %>%
+  group_by(Competition, CovidRestrictions) %>% mutate(percent = 100*NumMatches/sum(NumMatches))
+
+# ggplot(result_by_competition_season, aes(Season, NumMatches, label = Season)) +
+#      geom_bar(stat="identity") +
+#      facet_wrap(~Competition, scales="free")
+# ggplot(result_by_competition_season, aes(x = Season, y = NumMatches, fill = FTR, label = Season)) +
+#   facet_wrap(~Competition, scales="free") +
+#   geom_bar(position = "fill", stat = "identity") +
+#   labs(y = "Matches (%)", fill = "Result") +
+#   geom_text(aes(label=paste0(sprintf("%1.1f", percent),"%")),
+#             position=position_stack(vjust=0.5)) +
+#   #scale_x_discrete(guide = guide_axis(n.dodge=3)) +
+#   theme(axis.text.x = element_text(angle = 90,
+#                                    vjust = 0.5,
+#                                    hjust = 0.5))
+  # geom_text(aes(label = percent, "%"),
+  #          colour = "white",
+  #          position = position_fill(vjust = 0.5)) +
+  #coord_flip()
+
+
+
 ```
 
-
 ## Comprovació de la normalitat i homogeneïtat de la variància
+Pels valors
 
-
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+shapiro.test(football_matches$HY)
+shapiro.test(football_matches$AY)
+shapiro.test(football_matches$HR)
+shapiro.test(football_matches$AR)
+```
 
 ## Aplicació de proves estadístiques per comparar els grups de dades. En funció de les dades i de l’objectiu de l’estudi, aplicar proves de contrast d’hipòtesis, correlacions, regressions, etc. Aplicar almenys tres mètodes d’anàlisi diferents
 
@@ -209,8 +260,72 @@ names(referee)[names(referee) == 'n'] <- 'total_games'
 
 # Representació dels resultats
 
+## Restriccions COVID-19 als estadis
 
+Durant el març de 2020 es van implementar estrictes mesures arreu del món, posades en marxa per intentar evitar la propagació de la COVID-19 i els seus efectes, que principalment minimitzaven el contacte entre persones. Això va comportar l'aturada temporal de totes les lligues europees, algunes de les quals fins i tot van donar la temporada per finalitzada tot i tenir partits pendents per jugar, com en el cas de la Ligue 1. 
+
+Entre maig i juny de 2020, les competicions de futbol professional que no van cancel·lar la resta de partits pendents, van tornar a posar-se en marxa, però amb restriccions totals d'aforament. Així doncs, el tram final de la temporada 2019-2020 es va jugar sense públic en les tres lligues analitzades (La Liga, Premier League, Bundesliga).
+
+La temporada següent, 2020-2021, va tenir unes restriccions similars, tot i que es va permetre un aforament bastant reduït en un nombre molt limitat de jornades. 
+
+Finalment, durant la temporada 2021-2022 es va anar normalitzant la situació i, tot i que hi havia un límit d'aforament que variava segons el país i la regió, la majoria dels partits es van jugar ja amb una assistència de públic de milers de persones.
+
+Degut a l'impacte que se li atribueix als aficionats al rendiment dels equips tot i no participar directament en el joc, en aquest apartat s'analitzaran els resultats dels partits (victòria local/visitant o empat) segons múltiples variables, per poder comprovar si les restriccions d'aforament per la COVID-19 han pogut influir en els resultats dels partits.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# Resultats per temporada
+ggplot(result_by_season, aes(x = Season, y = percent, fill = Result, label = paste0(sprintf("%1.1f", percent),"%"))) +
+  geom_bar(stat = "identity", width = 0.8) +
+  geom_col() +
+  labs(y = "Matches (%)", fill = "Result", title = "Results by Season") +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust = 0.5))
+
+# Resultats per temporada i competició
+ggplot(result_by_competition_season, aes(x = Season, y = percent, fill = Result, label = paste0(sprintf("%1.1f", percent),"%"))) +
+  facet_wrap(~Competition, scales="free") +
+  geom_bar(stat = "identity", width = 0.8) +
+  geom_col() +
+  labs(y = "Matches (%)", fill = "Result", title = "Results by Season and Competition") +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust = 0.5))
+
+# Resultats per Post/pre covid i competició (2019-2020)
+ggplot(result_by_competition_covid, aes(x = CovidRestrictions, y = percent, fill = Result, label = paste0(sprintf("%1.1f", percent),"%"))) +
+  facet_wrap(~Competition, scales="free") +
+  geom_bar(stat = "identity", width = 0.8) +
+  geom_col() +
+  labs(x = "Affected by COVID-19", y = "Matches (%)", fill = "Result", title = "Results pre/post COVID-19 by Competition (Season 2019-2020)") +
+  geom_text(size = 3, position = position_stack(vjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust = 0.5))  
+```
+
+A simple vista, a la gràfica per temporada (Results by Season) ja s'observa una variació a la temporada posterior a l'aparició de la COVID-19 respecte als resultats de les altres temporades analitzades, un augment de les victòries visitants a costa de les locals. En canvi, durant la temporada 2019-2020 no s'aprecia una gran diferència, probablement pel fet que s'havien disputat més de la meitat dels partits abans de l'aturada.
+
+També s'aprecia un augment menys pronunciat dels empats, però degut al fet que tampoc és tan gran i que a l'any següent es manté pràcticament constant tot i haver tornat a la normalitat, no es pot determinar que sigui degut a les restriccions. Es podria fer un estudi per buscar una relació amb la introducció del videoarbitratge (VAR) a les principals lligues europees als últims anys, ja que aquest sí que podria ser el causant d'aquest augment.
+
+A l'anàlisi per temporada i competició (Results by Season and Competition) s'observa un augment important de les victòries visitants tant a la Bundesliga com a la Premier, tot i que en temporades diferents, en el primer cas és durant l'aparició de la pandèmia i, en el segon, a la temporada següent. A la lliga espanyola s'aprecia un increment menys pronunciat durant la temporada 2020-2021.
+
+Finalment, a l'anàlisi de la temporada 2019-2020 abans i després de l'aparició de la COVID-19, s'observa que el resultat anterior de la Bundesliga probablement no sigui causat per la COVID, ja que és bastant constant abans i després d'aquesta. En canvi, a la lliga espanyola i la Premier sí que s'observa aquest augment destacable de les victòries locals.
+
+Com a conclusió, tot sembla apuntar que l'efecte dels aficionats de l'estadi en els resultats del seu equip és real i apreciable, tot i que cal destacar que, en una lliga com la Bundesliga que sempre té uns bons números d'assistència de públic que alhora genera un gran ambient a l'estadi, sorprén que no es vegui l'efecte de les restriccions d'aforament en els resultats.
 
 # Resolució del problema
 
+
+# Bibliografía
+Dades d'aforament extretes de FBREF:
+https://fbref.com/en/comps/12/2019-2020/schedule/2019-2020-La-Liga-Scores-and-Fixtures
+https://fbref.com/en/comps/12/2020-2021/schedule/2020-2021-La-Liga-Scores-and-Fixtures
+https://fbref.com/en/comps/20/2019-2020/schedule/2019-2020-Bundesliga-Scores-and-Fixtures
+https://fbref.com/en/comps/20/2020-2021/schedule/2020-2021-Bundesliga-Scores-and-Fixtures
+https://fbref.com/en/comps/9/2019-2020/schedule/2019-2020-Premier-League-Scores-and-Fixtures
+https://fbref.com/en/comps/9/2020-2021/schedule/2020-2021-Premier-League-Scores-and-Fixtures
 
