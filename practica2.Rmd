@@ -187,6 +187,9 @@ summary(football_matches)
 
 ```
 
+Veiem com al resum de totes les variables, el qual ens deixa veure els màxims, mínims, mitjana i mediana de cada una de les variables, no apreciem cap dada que s'escapi de la normalitat del que és el món del futbol. Veiem molts mínims a zero i alguns valors màxims alts que a vegades pot costar de veure al món del futbol, però no impossibles.
+
+
 # Anàlisi de les dades
 
 ## Selecció dels grups de dades que es volen analitzar/comparar (p. e., si es volen comparar grups de dades, quins són aquests grups i quins tipus d’anàlisi s’aplicaran?)
@@ -420,11 +423,19 @@ A l'hora de mirar les diferències de resultats segons si l'experiència de l'à
 
 
 # Bibliografía
+
 Dades d'aforament extretes de FBREF:
+
 https://fbref.com/en/comps/12/2019-2020/schedule/2019-2020-La-Liga-Scores-and-Fixtures
+
 https://fbref.com/en/comps/12/2020-2021/schedule/2020-2021-La-Liga-Scores-and-Fixtures
+
 https://fbref.com/en/comps/20/2019-2020/schedule/2019-2020-Bundesliga-Scores-and-Fixtures
+
 https://fbref.com/en/comps/20/2020-2021/schedule/2020-2021-Bundesliga-Scores-and-Fixtures
+
 https://fbref.com/en/comps/9/2019-2020/schedule/2019-2020-Premier-League-Scores-and-Fixtures
+
 https://fbref.com/en/comps/9/2020-2021/schedule/2020-2021-Premier-League-Scores-and-Fixtures
+
 
