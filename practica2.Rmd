@@ -3,10 +3,10 @@ title: 'Tipologia i cicle de vida de les dades: Pràctica 2: Com realitzar la ne
 author: "Autor: Adrià Setó Balcells i Miquel Arisa Fuente"
 date: "Gener 2023"
 output:
-  word_document: default
   pdf_document:
     highlight: zenburn
     toc: yes
+  word_document: default
   html_document:
     highlight: default
     number_sections: yes
@@ -422,7 +422,7 @@ barplot(games, beside = T, col = c("blue","red","yellow"), main = "Comparativa d
 A l'hora de mirar les diferències de resultats segons si l'experiència de l'àrbitre es veu com hi ha una diferència entre les victòries locals i visitants. S'observa com als partits arbitrats per àrbitres novells hi ha un percentatge de victòries i d'empats superior als arbitrats per àrbitres experimentats, i tot el contrari amb les victòries visitants. Això pot ser degut a la presió efectuada del públic sobre l'àrbitre i la manera que té l'àrbitre de gestionar-la. També considerem que les temporades estudiades no acaben de reflectir al 100% la presió rebuda pels àrbitres degut a que la meitat d'aquests partits es van jugar a porta tancada o sense públic, tot i així ja es veuen reflectits uns indícis del comportament dels àrbitres davant la presió efectuada pel públic local.
 
 
-# Bibliografía
+# Bibliografia
 
 Dades d'aforament extretes de FBREF:
 
@@ -439,3 +439,17 @@ https://fbref.com/en/comps/9/2019-2020/schedule/2019-2020-Premier-League-Scores-
 https://fbref.com/en/comps/9/2020-2021/schedule/2020-2021-Premier-League-Scores-and-Fixtures
 
 
+# Contribucions
+
+Investigació prèvia: Adrià Setó, Miquel Arisa
+
+Redacció de les respostes: Adrià Setó, Miquel Arisa
+
+Desenvolupament del codi: Adrià Setó, Miquel Arisa
+
+Participació al vídeo: Adrià Setó, Miquel Arisa
+
+
+# Vídeo
+
+https://drive.google.com/file/d/1i8nl0oREUSPbGcPLKCCXEC6IaKHS5DEU/view?usp=sharing
