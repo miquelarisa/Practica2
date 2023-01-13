@@ -237,36 +237,31 @@ result_by_competition_covid <- football_matches %>% filter(Season == "2019-2020"
   count(Competition, CovidRestrictions, Result, name = "NumMatches") %>%
   group_by(Competition, CovidRestrictions) %>% mutate(percent = 100*NumMatches/sum(NumMatches))
 
-# ggplot(result_by_competition_season, aes(Season, NumMatches, label = Season)) +
-#      geom_bar(stat="identity") +
-#      facet_wrap(~Competition, scales="free")
-# ggplot(result_by_competition_season, aes(x = Season, y = NumMatches, fill = FTR, label = Season)) +
-#   facet_wrap(~Competition, scales="free") +
-#   geom_bar(position = "fill", stat = "identity") +
-#   labs(y = "Matches (%)", fill = "Result") +
-#   geom_text(aes(label=paste0(sprintf("%1.1f", percent),"%")),
-#             position=position_stack(vjust=0.5)) +
-#   #scale_x_discrete(guide = guide_axis(n.dodge=3)) +
-#   theme(axis.text.x = element_text(angle = 90,
-#                                    vjust = 0.5,
-#                                    hjust = 0.5))
-  # geom_text(aes(label = percent, "%"),
-  #          colour = "white",
-  #          position = position_fill(vjust = 0.5)) +
-  #coord_flip()
-
-
-
 ```
 
 ## Comprovació de la normalitat i homogeneïtat de la variància
-Pels valors
+
+S'analitzaran els valors de targetes grogues i vermelles per comprovar si es tracta d'una variança normal i homegenïa.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 shapiro.test(football_matches$HY)
 shapiro.test(football_matches$AY)
 shapiro.test(football_matches$HR)
 shapiro.test(football_matches$AR)
+
+par(mfrow=c(4,2))
+hist(football_matches$HY)
+qqnorm(football_matches$HY, main="Normal Q-Q Plot for HY")
+qqline(football_matches$HY,col=2)
+hist(football_matches$AY)
+qqnorm(football_matches$AY, main="Normal Q-Q Plot for AY")
+qqline(football_matches$AY,col=2)
+hist(football_matches$HR)
+qqnorm(football_matches$HR, main="Normal Q-Q Plot for HR")
+qqline(football_matches$HR,col=2)
+hist(football_matches$AR)
+qqnorm(football_matches$AR, main="Normal Q-Q Plot for HR")
+qqline(football_matches$AR,col=2)
 ```
 
 ## Aplicació de proves estadístiques per comparar els grups de dades. En funció de les dades i de l’objectiu de l’estudi, aplicar proves de contrast d’hipòtesis, correlacions, regressions, etc. Aplicar almenys tres mètodes d’anàlisi diferents
